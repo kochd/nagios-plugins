@@ -1,0 +1,78 @@
+#!/bin/bash
+CMD=`basename $0`
+option=$1
+device=$2
+warn=$3
+crit=$4
+print_help()
+{
+    echo " Usage:
+$CMD smart-id device [warn] [crit]
+
+$CMD 9   - Displays Power_On_Hours
+$CMD 12  - Power_Cycle_Count
+$CMD 197 - Current_Pending_Sector
+$CMD 198 - Offline_Uncorrectable
+serial   - Prints the Serial 
+model    - Print the modell 
+"
+}
+if [ -z $device ] ; then print_help ; echo "You need to specify a drive" ; exit 11
+elif ! [ -b $device ] ; then print_help ; echo "\"$device\" seams not to be a block device" ; exit 12
+else
+
+    result(){
+	if ! [ -z $warn ] && ! [ -z $crit ]
+	then
+	    if [[ $warn -gt $crit ]]; then print_help ; echo "Warn is greater then Crit. Error!" ; exit 4 ; fi
+	    if [[ $value -ge $crit ]]
+	    then
+		exit 2
+	    elif [[ $value -ge $warn ]]
+	    then
+		exit 1
+	    fi
+	fi
+    }
+
+case $1 in
+    9)
+	line="9 Power_On_Hours"
+	value=`smartctl -A $device | grep "$line" | awk {'print $10'}`
+	echo $device spinned for $value hours 
+	result
+	;;
+    12)
+	line="12 Power_Cycle_Count"
+	value=`smartctl -A $device | grep "$line" | awk {'print $10'}`
+	echo $device has been turned on and of for $value times
+	result
+	;;
+    197)
+	line="197 Current_Pending_Sector"
+        value=`smartctl -A $device | grep "$line" | awk {'print $10'}`
+	echo $device has $value dead secotrs
+	result
+	;;
+    198)
+	line="198 Offline_Uncorrectable"
+        value=`smartctl -A $device | grep "$line" | awk {'print $10'}`
+	echo $device has $value pending secotrs
+	result
+	;;
+  serial)
+	line="Serial Number"
+        value=`smartctl -a $device | grep "$line" | awk '{print substr($0, index($0,$3))}'`
+	echo $device: $value
+	;;
+  model)
+	line="Device Model"
+        value=`smartctl -a $device | grep "$line" | awk '{print substr($0, index($0,$3))}'`
+	echo $device: $value
+	;;
+    *)
+	echo SyntaxError
+	print_help
+	exit 10
+esac
+fi

@@ -1,0 +1,8 @@
+Common Usage: check_warranty [warn] [crit]
+
+Example:
+	check_warranty 20130403 
+Will send Critcal if the date is reached 
+
+	check_warranty 20130403  20130103 
+Will send Critcal if the date is reached and warn 3 months before
