@@ -1,7 +1,0 @@
-Common Usage: check_smart_table smart-id device [warn] [crit]
-
-Example:
-	check_smart_table 198 /dev/sda 1 5
-
-Would check for "Offline_Uncorrectable" usually called Bad Sectors or Block on the drive /dev/sda and warn if there is 1 or more or report coital if there are 5 or more.
-
