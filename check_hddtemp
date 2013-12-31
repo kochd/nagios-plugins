@@ -47,7 +47,7 @@ if [ -z "VALUE" ]; then
     exit 4
 fi
 
-echo "Temperature of $DISK is $TEMP | $VALUE"
+echo "Temperature of $DISK is $TEMP | temperature=$VALUE;$WARN;$CRIT"
 
 if [ -n "$CRIT" ]; then
     if [ "$VALUE" -ge "$CRIT" ] ; then
