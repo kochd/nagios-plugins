@@ -1,0 +1,59 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -d DEVICE [ -w Warning_Threshold ] [ -c Critical_Threshold ] \n \n"
+
+    printf " -d\t Device (e.g. /dev/sda) \n"
+    printf " -w\t Temperature value for warning threshold \n"
+    printf " -c\t Temperature value for critical threshold \n"
+    printf "\n"
+exit 0
+}
+
+if [ `echo "$@" | grep "\-h"` ]; then print_help ; fi
+
+args=`getopt --long -o "d:w:c:" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+	-d)
+	    DISK=$2
+	    shift 2
+	    ;;
+	-w)
+	    WARN=$2
+	    shift 2 
+	    ;;
+	-c)
+	    CRIT=$2
+	    shift 2
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+
+if [ -z "$DISK" ]; then
+    echo "You need to specify at least the device" 
+fi
+
+TEMP=`hddtemp $DISK | awk '{print $4}'`
+VALUE=`echo $TEMP | sed 's/°.*//g'`
+
+echo "Temperature of $DISK is $TEMP | $VALUE"
+
+if [ -n "$CRIT" ]; then
+    if [ "$VALUE" -ge "$CRIT" ] ; then
+	exit 2
+    fi
+fi
+
+if [ -n "$WARN" ]; then
+    if [ "$VALUE" -ge "$WARN" ] ; then
+	exit 1
+    fi
+fi
+
+exit 0
+
