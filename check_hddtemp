@@ -36,10 +36,16 @@ done
 
 if [ -z "$DISK" ]; then
     echo "You need to specify at least the device" 
+    exit 4
 fi
 
 TEMP=`hddtemp $DISK | awk '{print $4}'`
 VALUE=`echo $TEMP | sed 's/°.*//g'`
+
+if [ -z "VALUE" ]; then
+    echo "Failed to get temperature for $DISK"
+    exit 4
+fi
 
 echo "Temperature of $DISK is $TEMP | $VALUE"
 
