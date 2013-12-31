@@ -39,7 +39,7 @@ if [ -z "$DISK" ]; then
     exit 4
 fi
 
-TEMP=`hddtemp $DISK | awk '{print $4}'`
+TEMP=`hddtemp $DISK | cut -d: -f3`
 VALUE=`echo $TEMP | sed 's/°.*//g'`
 
 if [ -z "VALUE" ]; then
