@@ -17,21 +17,25 @@ args=`getopt --long -o "u:p:w:c:" "$@"`
 eval set -- "$args"
 while true; do
     case "$1" in
-	-u)
-	    USER=$2
-	    shift 2
-	    ;;
-	-p)
-	    PASSWORD=$2
-	    shift 2
-	    ;;
-	-c)
-	    CRIT=$2
-	    shift 2
-	    ;;
-	*)
-	    break
-	    ;;
+        -u)
+            USER=$2
+            shift 2
+            ;;
+        -p)
+            PASSWORD=$2
+            shift 2
+            ;;
+        -w)
+            WARN=$2
+            shift 2
+            ;;
+        -c)
+            CRIT=$2
+            shift 2
+            ;;
+        *)
+            break
+            ;;
     esac
 done
 
@@ -42,15 +46,9 @@ if [ -z "$USER" ]; then
     set USER=root
 fi
 
-OUTPUT=`echo status | mysql -u$USER -p$PASSWORD | tail -n3 | cut -d":" -f8 | tr -d "-" | tr -d "\n"`
-
-if [ $? -ne "0" ]; then
-    echo Failed to execute
-    exit 3
-fi
-
+OUTPUT=`echo status | mysql -u$USER -p$PASSWORD | tail -n3 | cut -d":" -f8 | tr -d "-" | tr -d "\n" | tr -d " "`
 VALUE=`echo $OUTPUT | tr -d -c 0-9.`
-
+INT=`echo $VALUE | sed 's/\..*//g'`
 
 if [ -z "$VALUE" ]; then
     echo "Failed to get value"
@@ -60,16 +58,15 @@ fi
 echo "$OUTPUT | queries=$VALUE;$WARN;$CRIT"
 
 if [ -n "$CRIT" ]; then
-    if [ "$VALUE" -ge "$CRIT" ] ; then
-	exit 2
+    if [ "$INT" -ge "$CRIT" ] ; then
+        exit 2
     fi
 fi
 
 if [ -n "$WARN" ]; then
-    if [ "$VALUE" -ge "$WARN" ] ; then
-	exit 1
+    if [ "$INT" -ge "$WARN" ] ; then
+        exit 1
     fi
 fi
 
 exit 0
-
