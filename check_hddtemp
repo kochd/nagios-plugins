@@ -39,10 +39,10 @@ if [ -z "$DISK" ]; then
     exit 3
 fi
 
-if ! [ -b "$DISK" ]; then
+if [ ! -b "$DISK" ]; then
     echo "$DISK is not an blockdevice"
     exit 3
-fi 
+fi
 
 TEMP=`hddtemp $DISK | cut -d: -f3`
 VALUE=`echo $TEMP | sed 's/°.*//g'`
