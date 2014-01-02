@@ -1,0 +1,75 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -u user -p password [ -w Warning_Threshold ] [ -c Critical_Threshold ] \n \n"
+
+    printf " -u\t user \n"
+    printf " -p\t password \n"
+    printf " -w\t Temperature value for warning threshold \n"
+    printf " -c\t Temperature value for critical threshold \n"
+    printf "\n"
+exit 0
+}
+
+if [ `echo "$@" | grep "\-h"` ]; then print_help ; fi
+
+args=`getopt --long -o "u:p:w:c:" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+	-u)
+	    USER=$2
+	    shift 2
+	    ;;
+	-p)
+	    PASSWORD=$2
+	    shift 2
+	    ;;
+	-c)
+	    CRIT=$2
+	    shift 2
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+done
+
+
+
+
+if [ -z "$USER" ]; then
+    set USER=root
+fi
+
+OUTPUT=`echo status | mysql -u$USER -p$PASSWORD | tail -n3 | cut -d":" -f8 | tr -d "-" | tr -d "\n"`
+
+if [ $? -ne "0" ]; then
+    echo Failed to execute
+    exit 3
+fi
+
+VALUE=`echo $OUTPUT | tr -d -c 0-9.`
+
+
+if [ -z "$VALUE" ]; then
+    echo "Failed to get value"
+    exit 3
+fi
+
+echo "$OUTPUT | queries=$VALUE;$WARN;$CRIT"
+
+if [ -n "$CRIT" ]; then
+    if [ "$VALUE" -ge "$CRIT" ] ; then
+	exit 2
+    fi
+fi
+
+if [ -n "$WARN" ]; then
+    if [ "$VALUE" -ge "$WARN" ] ; then
+	exit 1
+    fi
+fi
+
+exit 0
+
