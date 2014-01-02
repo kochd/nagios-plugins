@@ -45,7 +45,7 @@ if [ ! -b "$DISK" ]; then
 fi
 
 TEMP=`hddtemp $DISK | cut -d: -f3`
-VALUE=`echo $TEMP | sed 's/°.*//g'`
+VALUE=`echo $TEMP | tr -d -c 0-9`
 
 if [ -z "VALUE" ]; then
     echo "Failed to get temperature for $DISK"
