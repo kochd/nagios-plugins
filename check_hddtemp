@@ -35,16 +35,21 @@ while true; do
 done
 
 if [ -z "$DISK" ]; then
-    echo "You need to specify at least the device" 
-    exit 4
+    echo "You need to specify at least the device"
+    exit 3
 fi
+
+if ! [ -b "$DISK" ]; then
+    echo "$DISK is not an blockdevice"
+    exit 3
+fi 
 
 TEMP=`hddtemp $DISK | cut -d: -f3`
 VALUE=`echo $TEMP | sed 's/°.*//g'`
 
 if [ -z "VALUE" ]; then
     echo "Failed to get temperature for $DISK"
-    exit 4
+    exit 3
 fi
 
 echo "Temperature of $DISK is $TEMP | temperature=$VALUE;$WARN;$CRIT"
