@@ -46,13 +46,14 @@ fi
 
 TEMP=`hddtemp $DISK | cut -d: -f3`
 VALUE=`echo $TEMP | tr -d -c 0-9`
+UNIT=`echo $TEMP | tr -d -c CF`
 
 if [ -z "VALUE" ]; then
     echo "Failed to get temperature for $DISK"
     exit 3
 fi
 
-echo "Temperature of $DISK is $TEMP | temperature=$VALUE;$WARN;$CRIT"
+echo "Temperature of $DISK is $TEMP | temperature=$VALUE[$UNIT];$WARN;$CRIT"
 
 if [ -n "$CRIT" ]; then
     if [ "$VALUE" -ge "$CRIT" ] ; then
