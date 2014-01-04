@@ -51,6 +51,6 @@ if [ -z "$IN" ] || [ -z "$OUT" ]; then
     exit 3
 fi
 
-echo "Traffic for $INTERFACE -- Rx: $IN KB/s // Tx: $OUT KB/s | Tx=$OUT[$UNIT];$WARNTX;$CRITTX Rx=$IN[$UNIT];$WARNRX;$CRITRX"
+echo "Traffic for $INTERFACE -- Rx: $IN KB/s // Tx: $OUT KB/s | Tx=$OUT$UNIT;$WARNTX;$CRITTX Rx=$IN$UNIT;$WARNRX;$CRITRX"
 
 exit 0
