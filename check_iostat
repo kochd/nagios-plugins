@@ -31,18 +31,19 @@ if [ -z "$DEVICE" ]; then
     exit 3
 fi
 
-OUTPUT=`iostat $DEVICE -d | tail -n2 | head -n1`
+OUTPUT=`iostat -x -d $DEVICE | tail -n2 | head -n1`
 
-IOWRITE=`echo $OUTPUT | awk '{print $4}'`
-IOREAD=`echo $OUTPUT | awk '{print $3}'`
-
-UNIT=KB
+IOWRITE=`echo $OUTPUT | awk '{print $6}'`
+IOREAD=`echo $OUTPUT | awk '{print $7}'`
+IOWAIT=`echo $OUTPUT | awk '{print $10}'`
+UNIT1=KB
+UNIT2=ms
 
 if [ -z "$IOWRITE" ] || [ -z "$IOREAD" ]; then
     echo "Failed to get a value for $DEVICE"
     exit 3
 fi
 
-echo "IO for $DEVICE -- Read: $IOREAD kB/s // Write: $IOWRITE kB/s | read=$IOREAD$UNIT; write=$IOWRITE$UNIT"
+echo "IO for $DEVICE -- Read: $IOREAD kB/s // Write: $IOWRITE kB/s // Wait: $IOWAIT ms | read=$IOREAD$UNIT1 write=$IOWRITE$UNIT1 wait=$IOWAIT$UNIT2"
 
 exit 0
