@@ -1,0 +1,48 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -d device [ -d DELAY ] \n \n"
+
+    printf " -d\t Device to check (e.g. /dev/sda) \n"
+    printf "\n"
+exit 0
+}
+
+args=`getopt --long -o "i:d:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -d)
+            DEVICE=$2
+            shift 2
+            ;;
+	-h)
+	    print_help
+	    ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+
+if [ -z "$DEVICE" ]; then
+    echo "You need to specify at least the device"
+    exit 3
+fi
+
+OUTPUT=`iostat $DEVICE -d | tail -n2 | head -n1`
+
+IOWRITE=`echo $OUTPUT | awk '{print $4}'`
+IOREAD=`echo $OUTPUT | awk '{print $3}'`
+
+UNIT=KB
+
+if [ -z "$IOWRITE" ] || [ -z "$IOREAD" ]; then
+    echo "Failed to get a value for $DEVICE"
+    exit 3
+fi
+
+echo "IO for $DEVICE -- Read: $IOREAD kB/s // Write: $IOWRITE kB/s | read=$IOREAD$UNIT; write=$IOWRITE$UNIT"
+
+exit 0
