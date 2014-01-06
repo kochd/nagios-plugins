@@ -1,0 +1,53 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -d device [ -d DELAY ] \n \n"
+
+    printf " -d\t Device to check (e.g. /dev/sda) \n"
+    printf "\n"
+exit 0
+}
+
+args=`getopt --long -o "i:d:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -d)
+            DEVICE=$2
+            shift 2
+            ;;
+	-h)
+	    print_help
+	    ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+
+if [ -z "$DEVICE" ]; then
+    echo "You need to specify at least the device"
+    exit 3
+fi
+
+OUTPUT=`smartctl -a $DEVICE ; echo $?`
+EXIT=`echo "$OUTPUT" | tail -n1`
+CHECKS=`echo "$OUTPUT" | grep ^#`
+SUM_CHECKS=`echo "$CHECKS" | wc -l`
+PASSED_CHECKS=`echo "$CHECKS" | grep "Completed without error" | wc -l`
+
+if [ -z "$OUTPUT" ]; then
+    echo "Failed to get an output for $DEVICE"
+    exit 3
+fi
+
+
+
+if [ "$EXIT" -gt 0 ]; then
+    echo "$PASSED_CHECKS/$SUM_CHECKS checks passed - Theres is something wrong with drive check smartctl"
+    exit 2
+    else
+        echo "$PASSED_CHECKS/$SUM_CHECKS checks passed"
+    exit 0
+fi
