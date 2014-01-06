@@ -1,0 +1,69 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename [ -w Warning_Threshold ] [ -c Critical_Threshold ] \n \n"
+
+    printf " -w\t Warning threshold (Percent) \n"
+    printf " -c\t Critical threshold (Percent) \n"
+    printf "\n"
+exit 0
+}
+WARN=100
+CRIT=100
+
+args=`getopt --long -o "w:c:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -w)
+            WARN=$2
+            shift 2
+            ;;
+	-c)
+	    CRIT=$2
+	    shift 2
+	    ;;
+	-h)
+	    print_help
+	    ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+
+OUTPUT=`free -mo`
+
+MEM_TOTAL=`echo "$OUTPUT" | grep Mem: | awk '{print $2}'`
+MEM_USED=`echo "$OUTPUT" | grep Mem: | awk '{print $3}'`
+MEM_PCT_USED=$((($MEM_USED/($MEM_TOTAL/100))))
+
+SWAP_TOTAL=`echo "$OUTPUT" | grep Swap: | awk '{print $2}'`
+SWAP_USED=`echo "$OUTPUT" | grep Swap: | awk '{print $3}'`
+SWAP_PCT_USED=$((($SWAP_USED/($SWAP_TOTAL/100))))
+
+WARN=$((($MEM_TOTAL/100)*$WARN))
+CRIT=$((($MEM_TOTAL/100)*$CRIT))
+
+if [ -z "$OUTPUT" ]; then
+   echo "Failed to get an output"
+   exit 3
+fi
+
+echo "Mem used: ${MEM_USED}/${MEM_TOTAL}MB (${MEM_PCT_USED}%) // Swap used: ${SWAP_USED}/${SWAP_TOTAL}MB (${SWAP_PCT_USED}%) | mem_used=${MEM_USED}MB;${WARN};${CRIT} mem_total=${MEM_TOTAL}MB swap_used=${SWAP_USED}MB swap_total=${SWAP_TOTAL}MB" 
+
+
+if [ -n "$CRIT" ]; then
+    if [ "$MEM_PCT_USED" -ge "$CRIT" ] ; then
+	exit 2
+    fi
+fi
+
+if [ -n "$WARN" ]; then
+    if [ "$MEM_PCT_USED" -ge "$WARN" ] ; then
+	exit 1
+    fi
+fi
+
+exit 0
