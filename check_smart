@@ -1,14 +1,14 @@
 #!/bin/sh
 basename=`basename $0`
 print_help(){
-    printf "$basename -d device [ -d DELAY ] \n \n"
+    printf "$basename -d device\n \n"
 
     printf " -d\t Device to check (e.g. /dev/sda) \n"
     printf "\n"
 exit 0
 }
 
-args=`getopt --long -o "i:d:h" "$@"`
+args=`getopt --long -o "d:h" "$@"`
 eval set -- "$args"
 while true; do
     case "$1" in
@@ -25,17 +25,21 @@ while true; do
     esac
 done
 
+if [ `id -u` -ne 0 ]; then
+    echo "You need to execute this check with sudo. Path your sudoers file with NOPASSWD argument"
+    exit 3
+fi
 
 if [ -z "$DEVICE" ]; then
     echo "You need to specify at least the device"
     exit 3
 fi
 
-OUTPUT=`smartctl -a $DEVICE ; echo $?`
+OUTPUT=`smartctl -A $DEVICE ; echo $?`
 EXIT=`echo "$OUTPUT" | tail -n1`
-CHECKS=`echo "$OUTPUT" | grep ^#`
+CHECKS=`echo "$OUTPUT" | tail -n +8 | head -n -2`
 SUM_CHECKS=`echo "$CHECKS" | wc -l`
-PASSED_CHECKS=`echo "$CHECKS" | grep "Completed without error" | wc -l`
+PASSED_CHECKS=`echo "$CHECKS" | grep "-" | wc -l`
 
 if [ -z "$OUTPUT" ]; then
     echo "Failed to get an output for $DEVICE"
@@ -45,7 +49,7 @@ fi
 
 
 if [ "$EXIT" -gt 0 ]; then
-    echo "$PASSED_CHECKS/$SUM_CHECKS checks passed - Theres is something wrong with drive check smartctl"
+    echo "$PASSED_CHECKS/$SUM_CHECKS checks passed - Theres is something wrong with the drive check smartctl"
     exit 2
     else
         echo "$PASSED_CHECKS/$SUM_CHECKS checks passed"
