@@ -33,17 +33,23 @@ fi
 
 OUTPUT=`iostat -x -d $DEVICE | tail -n2 | head -n1`
 
+RS=`echo $OUTPUT | awk '{print $4}'`
+WS=`echo $OUTPUT | awk '{print $5}'`
 IOWRITE=`echo $OUTPUT | awk '{print $6}'`
 IOREAD=`echo $OUTPUT | awk '{print $7}'`
 IOWAIT=`echo $OUTPUT | awk '{print $10}'`
-UNIT1=KB
-UNIT2=ms
+UTILISATION=`echo $OUTPUT | awk '{print $14}'`
 
 if [ -z "$IOWRITE" ] || [ -z "$IOREAD" ]; then
     echo "Failed to get a value for $DEVICE"
     exit 3
 fi
 
-echo "IO for $DEVICE -- Read: $IOREAD kB/s // Write: $IOWRITE kB/s // Wait: $IOWAIT ms | read=$IOREAD$UNIT1 write=$IOWRITE$UNIT1 wait=$IOWAIT$UNIT2"
-
+echo "IO for $DEVICE -- Read: $IOREAD kB/s // Write: $IOWRITE kB/s // Wait: $IOWAIT ms // Reads/s $RS // Writes/s $WS // Utilisation $UTILISATION % | \
+kbs_read=${IOREAD}KB \
+kbs_write=${IOWRITE} \
+ms_wait=${IOWAIT}ms  \
+utilisation=${UTILISATION}% \
+rs=${RS} \
+ws=${WS}"
 exit 0
