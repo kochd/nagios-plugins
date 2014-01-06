@@ -39,7 +39,7 @@ OUTPUT=`smartctl -A $DEVICE ; echo $?`
 EXIT=`echo "$OUTPUT" | tail -n1`
 CHECKS=`echo "$OUTPUT" | tail -n +8 | head -n -2`
 SUM_CHECKS=`echo "$CHECKS" | wc -l`
-PASSED_CHECKS=`echo "$CHECKS" | grep "-" | wc -l`
+PASSED_CHECKS=`echo "$CHECKS" | grep -v "FAILING_NOW" | wc -l`
 
 if [ -z "$OUTPUT" ]; then
     echo "Failed to get an output for $DEVICE"
