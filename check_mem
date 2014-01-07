@@ -11,6 +11,8 @@ exit 0
 WARN=100
 CRIT=100
 
+scale=2
+
 args=`getopt --long -o "w:c:h" "$@"`
 eval set -- "$args"
 while true; do
@@ -37,14 +39,14 @@ OUTPUT=`free -m`
 
 MEM_TOTAL=`echo "$OUTPUT" | grep Mem: | awk '{print $2}'`
 MEM_USED=`echo "$OUTPUT" | grep buffers/cache | awk '{print $3}'`
-MEM_PCT_USED=`echo "$MEM_USED/($MEM_TOTAL/100)" | bc -l`
+MEM_PCT_USED=`echo "scale=$scale; $MEM_USED/($MEM_TOTAL/100)" | bc -l`
 
 SWAP_TOTAL=`echo "$OUTPUT" | grep Swap: | awk '{print $2}'`
 SWAP_USED=`echo "$OUTPUT" | grep Swap: | awk '{print $3}'`
-SWAP_PCT_USED=`echo "$SWAP_USED/($SWAP_TOTAL/100)" | bc -l`
+SWAP_PCT_USED=`echo "scale=$scale; $SWAP_USED/($SWAP_TOTAL/100)" | bc -l`
 
-WARN=`echo "($MEM_TOTAL/100)*$WARN" | bc -l`
-CRIT=`echo "($MEM_TOTAL/100)*$CRIT" | bc -l`
+WARN=`echo "scale=$scale; ($MEM_TOTAL/100)*$WARN" | bc -l`
+CRIT=`echo "scale=$scale; ($MEM_TOTAL/100)*$CRIT" | bc -l`
 
 if [ -z "$OUTPUT" ]; then
    echo "Failed to get an output"
