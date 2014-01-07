@@ -35,8 +35,8 @@ OUTPUT=`iostat -x -d $DEVICE | tail -n2 | head -n1`
 
 RS=`echo $OUTPUT | awk '{print $4}'`
 WS=`echo $OUTPUT | awk '{print $5}'`
-IOWRITE=`echo $OUTPUT | awk '{print $6}'`
-IOREAD=`echo $OUTPUT | awk '{print $7}'`
+IOREAD=`echo $OUTPUT | awk '{print $8}'`
+IOWRITE=`echo $OUTPUT | awk '{print $7}'`
 IOWAIT=`echo $OUTPUT | awk '{print $10}'`
 UTILISATION=`echo $OUTPUT | awk '{print $14}'`
 
