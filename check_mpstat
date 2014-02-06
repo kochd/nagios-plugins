@@ -1,7 +1,31 @@
 #!/bin/sh
 basename=`basename $0`
+print_help(){
+    printf "$basename -i INTERVAL"
 
-OUTPUT=`mpstat | tail -n1`
+    printf " -i\t Interval for messurement "
+    printf "\n"
+exit 0
+}
+DELAY=60
+args=`getopt --long -o "i:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -i)
+            INTERVAL=$2
+            shift 2
+            ;;
+	-h)
+	    print_help
+	    ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+OUTPUT=`mpstat 1 $INTERVAL | tail -n1`
 
 usr=`echo $OUTPUT | awk '{print $3}'`
 nice=`echo $OUTPUT | awk '{print $4}'`
