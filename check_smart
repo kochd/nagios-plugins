@@ -25,6 +25,11 @@ while true; do
     esac
 done
 
+if [ ! -b "$DEVICE" ]; then
+    echo "$DEVICE is not an blockdevice"
+    exit 3
+fi
+
 if [ `id -u` -ne 0 ]; then
     echo "You need to execute this check with sudo. Path your sudoers file with NOPASSWD argument"
     exit 3

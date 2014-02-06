@@ -45,15 +45,15 @@ SWAP_TOTAL=`echo "$OUTPUT" | grep Swap: | awk '{print $2}'`
 SWAP_USED=`echo "$OUTPUT" | grep Swap: | awk '{print $3}'`
 SWAP_PCT_USED=`echo "scale=$scale; $SWAP_USED/($SWAP_TOTAL/100)" | bc -l`
 
-WARN=`echo "scale=$scale; ($MEM_TOTAL/100)*$WARN" | bc -l`
-CRIT=`echo "scale=$scale; ($MEM_TOTAL/100)*$CRIT" | bc -l`
+WARN_INT=`echo "scale=$scale; ($MEM_TOTAL/100)*$WARN" | bc -l`
+CRIT_INT=`echo "scale=$scale; ($MEM_TOTAL/100)*$CRIT" | bc -l`
 
 if [ -z "$OUTPUT" ]; then
    echo "Failed to get an output"
    exit 3
 fi
 
-echo "Mem used: ${MEM_USED}/${MEM_TOTAL}MB (${MEM_PCT_USED}%) // Swap used: ${SWAP_USED}/${SWAP_TOTAL}MB (${SWAP_PCT_USED}%) | mem_used=${MEM_USED}MB;${WARN};${CRIT} mem_total=${MEM_TOTAL}MB swap_used=${SWAP_USED}MB swap_total=${SWAP_TOTAL}MB" 
+echo "Mem used: ${MEM_USED}/${MEM_TOTAL}MB (${MEM_PCT_USED}%) // Swap used: ${SWAP_USED}/${SWAP_TOTAL}MB (${SWAP_PCT_USED}%) | mem_used=${MEM_USED}MB;${WARN_INT};${CRIT_INT} mem_total=${MEM_TOTAL}MB swap_used=${SWAP_USED}MB swap_total=${SWAP_TOTAL}MB" 
 
 if [ -n "$CRIT" ]; then
     if [ `echo "$MEM_PCT_USED > $CRIT" | bc -l` -eq 1 ] ; then
