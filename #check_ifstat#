@@ -1,0 +1,54 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -i INTERFACE [ -d DELAY ] \n \n"
+
+    printf " -i\t Interface to messure (e.g. eth0) \n"
+    printf " -d\t Delay to messure in seconds. The average traffic over that \n"
+    printf " \t period will be printet. (Default: 60)"
+    printf "\n"
+exit 0
+}
+
+args=`getopt --long -o "i:d:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -i)
+            INTERFACE=$2
+            shift 2
+            ;;
+        -d)
+            DELAY=$2
+            shift 2
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+
+echo DELAY $DELAY
+echo INTERFACE $INTERFACE
+if [ -z "$INTERFACE" ]; then
+    echo "You need to specify at least the interface"
+    exit 3
+fi
+
+OUTPUT=`ifstat -i $INTERFACE $DELAY 1 | tail -n1`
+IN=`echo $OUTPUT | awk '{print $1}'`
+OUT=`echo $OUTPUT | awk '{print $2}'`
+
+INT_IN=`echo $IN | sed 's/\..*//g'`
+INT_OUT=`echo $OUT | sed 's/\..*//g'`
+
+if [ -z "$IN" ] || [ -z "$OUT" ]; then
+    echo "Failed to get a value for $INTERFACE"
+    exit 3
+fi
+
+echo "Rx: $IN KB/s // Tx: $OUT KB/s | Tx=$OUT;$WARNTX;$CRITTX Rx=$IN;$WARNRX;$CRITRX"
+
+exit 0
+

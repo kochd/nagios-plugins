@@ -1,0 +1,47 @@
+#!/bin/sh
+basename=`basename $0`
+
+OUTPUT=`mpstat | tail -n1`
+
+usr=`echo $OUTPUT | awk '{print $3}'`
+nice=`echo $OUTPUT | awk '{print $4}'`
+sys=`echo $OUTPUT | awk '{print $5}'`
+iowait=`echo $OUTPUT | awk '{print $6}'`
+irq=`echo $OUTPUT | awk '{print $7}'`
+soft=`echo $OUTPUT | awk '{print $8}'`
+steal=`echo $OUTPUT | awk '{print $9}'`
+guest=`echo $OUTPUT | awk '{print $10}'`
+idle=`echo $OUTPUT | awk '{print $11}'`
+idledotsep=`echo $idle | tr "," "."`
+total=`echo "scale=2; 100-$idledotsep" | bc -l`
+
+
+
+if [ -z "$OUTPUT" ]; then
+    echo "Failed to get a value for $DEVICE"
+    exit 3
+fi
+
+echo "usr: $usr% // \
+nice: $nice% // \
+sys: $sys //\
+iowait: $iowait //\
+irq: $irq //\
+soft: $soft //\
+steal: $steal //\
+guest: $guest //\
+total: $total \
+|\
+usr=${usr}% \
+nice=${nice}% \
+sys=${sys}% \
+iowait=${iowait}% \
+irq=${irq}% \
+soft=${soft}% \
+steal=${steal}% \
+guest=${guest}% \
+total=${total}%
+"
+
+
+exit 0
