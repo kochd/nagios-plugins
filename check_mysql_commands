@@ -7,7 +7,7 @@ print_help(){
     printf "\n"
 exit 0
 }
-DELAY=60
+
 
 args=`getopt --long -o "d:u:p:i:h" "$@"`
 eval set -- "$args"
@@ -49,9 +49,10 @@ OUTPUT2=`get_output`
 #echo "$OUTPUT1"
 
 calc_value(){
+scale=2
 for value1 in `echo "$OUTPUT1" | grep $1 | cut -d";" -f2`; do
     for value2 in `echo "$OUTPUT2" | grep $1 | cut -d";" -f2`; do
-        echo "($value2 - $value1)/$INTERVAL" | bc -l
+        echo "scale=$scale; ($value2 - $value1)/$INTERVAL" | bc -l
     done
 done
 }
