@@ -1,0 +1,79 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -d DATABASE -u USER -p PASSWORD -i INTERVAL"
+
+    printf " -d\t Database to query "
+    printf "\n"
+exit 0
+}
+DELAY=60
+
+args=`getopt --long -o "d:u:p:i:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -d)
+            DATABASE=$2
+            shift 2
+            ;;
+        -u)
+            DBUSER=$2
+            shift 2
+            ;;
+        -p)
+            PASSWORD=$2
+            shift 2
+            ;;
+        -i)
+            INTERVAL=$2
+            shift 2
+            ;;
+        -h)
+            print_help
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+get_output(){
+echo "SELECT * FROM INFORMATION_SCHEMA.GLOBAL_STATUS WHERE Variable_Name like 'Com_%'" | mysql -u$DBUSER -p$PASSWORD -D$DATABASE | sed 's/\t/;/g'
+}
+
+OUTPUT1=`get_output`
+sleep $INTERVAL
+OUTPUT2=`get_output`
+
+#echo "$OUTPUT1"
+
+calc_value(){
+for value1 in `echo "$OUTPUT1" | grep $1 | cut -d";" -f2`; do
+    for value2 in `echo "$OUTPUT2" | grep $1 | cut -d";" -f2`; do
+        echo "($value2 - $value1)/$INTERVAL" | bc -l
+    done
+done
+}
+
+COM_SELECT=`calc_value COM_SELECT;`
+COM_CALL_PROCEDURE=`calc_value COM_CALL_PROCEDURE;`
+COM_INSERT=`calc_value "COM_INSERT;"`
+COM_DELETE=`calc_value "COM_DELETE;"`
+COM_UPDATE=`calc_value "COM_UPDATE;"`
+COM_REPLACE=`calc_value "COM_REPLACE;"`
+
+echo \
+COM_SELECT=$COM_SELECT // \
+COM_CALL_PROCEDURE=$COM_CALL_PROCEDURE // \
+COM_INSERT=$COM_INSERT // \
+COM_DELETE=$COM_DELETE // \
+COM_UPDATE=$COM_UPDATE // \
+COM_REPLACE=$COM_REPLACE // \
+\
+COM_SELECT=$COM_SELECT \
+COM_CALL_PROCEDURE=$COM_CALL_PROCEDURE \
+COM_INSERT=$COM_INSERT \
+COM_DELETE=$COM_DELETE \
+COM_UPDATE=$COM_UPDATE \
+COM_REPLACE=$COM_REPLACE
