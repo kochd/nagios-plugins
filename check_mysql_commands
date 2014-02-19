@@ -7,7 +7,7 @@ print_help(){
     printf "\n"
 exit 0
 }
-
+export scale=2
 
 args=`getopt --long -o "d:u:p:i:h" "$@"`
 eval set -- "$args"
@@ -49,7 +49,6 @@ OUTPUT2=`get_output`
 #echo "$OUTPUT1"
 
 calc_value(){
-scale=2
 for value1 in `echo "$OUTPUT1" | grep $1 | cut -d";" -f2`; do
     for value2 in `echo "$OUTPUT2" | grep $1 | cut -d";" -f2`; do
         echo "scale=$scale; ($value2 - $value1)/$INTERVAL" | bc -l
@@ -57,12 +56,14 @@ for value1 in `echo "$OUTPUT1" | grep $1 | cut -d";" -f2`; do
 done
 }
 
+
 COM_SELECT=`calc_value COM_SELECT;`
 COM_CALL_PROCEDURE=`calc_value COM_CALL_PROCEDURE;`
 COM_INSERT=`calc_value "COM_INSERT;"`
 COM_DELETE=`calc_value "COM_DELETE;"`
 COM_UPDATE=`calc_value "COM_UPDATE;"`
 COM_REPLACE=`calc_value "COM_REPLACE;"`
+TOTAL=`echo "scale=$scale; $COM_SELECT + $COM_CALL_PROCEDURE + $COM_INSERT + $COM_DELETE + $COM_UPDATE + $COM_REPLACE" | bc -l`
 
 echo \
 COM_SELECT=$COM_SELECT // \
@@ -71,10 +72,12 @@ COM_INSERT=$COM_INSERT // \
 COM_DELETE=$COM_DELETE // \
 COM_UPDATE=$COM_UPDATE // \
 COM_REPLACE=$COM_REPLACE // \
+TOTAL=$TOTAL \
 \
 COM_SELECT=$COM_SELECT \
 COM_CALL_PROCEDURE=$COM_CALL_PROCEDURE \
 COM_INSERT=$COM_INSERT \
 COM_DELETE=$COM_DELETE \
 COM_UPDATE=$COM_UPDATE \
-COM_REPLACE=$COM_REPLACE
+COM_REPLACE=$COM_REPLACE \
+TOTAL=$TOTAL
