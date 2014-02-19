@@ -49,11 +49,9 @@ OUTPUT2=`get_output`
 #echo "$OUTPUT1"
 
 calc_value(){
-for value1 in `echo "$OUTPUT1" | grep $1 | cut -d";" -f2`; do
-    for value2 in `echo "$OUTPUT2" | grep $1 | cut -d";" -f2`; do
-        echo "scale=$scale; ($value2 - $value1)/$INTERVAL" | bc -l
-    done
-done
+value1=`echo "$OUTPUT1" | grep $1 | cut -d";" -f2`
+value2=`echo "$OUTPUT2" | grep $1 | cut -d";" -f2`
+echo "scale=$scale; ($value2 - $value1)/$INTERVAL" | bc -l
 }
 
 
