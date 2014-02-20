@@ -62,7 +62,7 @@ COM_DELETE=`calc_value "COM_DELETE;"`
 COM_UPDATE=`calc_value "COM_UPDATE;"`
 COM_REPLACE=`calc_value "COM_REPLACE;"`
 COM_COMMIT=`calc_value "COM_COMMIT;"`
-TOTAL=`echo "scale=$scale; $COM_SELECT + $COM_CALL_PROCEDURE + $COM_INSERT + $COM_DELETE + $COM_UPDATE + $COM_REPLACE" | bc -l`
+TOTAL=`echo "scale=$scale; $COM_SELECT + $COM_CALL_PROCEDURE + $COM_INSERT + $COM_DELETE + $COM_UPDATE + $COM_REPLACE + $COM_COMMIT" | bc -l`
 
 echo \
 COM_SELECT=$COM_SELECT // \
