@@ -51,7 +51,7 @@ OUTPUT2=`get_output`
 calc_value(){
 value1=`echo "$OUTPUT1" | grep $1 | cut -d";" -f2`
 value2=`echo "$OUTPUT2" | grep $1 | cut -d";" -f2`
-echo "scale=$scale; ($value2 - $value1)/$INTERVAL" | bc -l | sed 's/^-//g'
+echo "scale=$scale; ($value2 - $value1)/$INTERVAL" | bc -l | sed 's/^-.*//g'
 }
 
 
