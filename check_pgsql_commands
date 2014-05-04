@@ -1,0 +1,79 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -d DATABASE -i INTERVAL"
+
+    printf " -d\t Database to query "
+    printf " -d\i Interval for messurement "
+    printf "\n"
+exit 0
+}
+export scale=2
+
+args=`getopt --long -o "d:u:p:i:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -d)
+            DATABASE=$2
+            shift 2
+            ;;
+        -u)
+            DBUSER=$2
+            shift 2
+            ;;
+        -p)
+            PASSWORD=$2
+            shift 2
+            ;;
+        -i)
+            INTERVAL=$2
+            shift 2
+            ;;
+        -h)
+            print_help
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+get_output(){
+psql -A -t -d template1 -c "SELECT tup_returned,tup_fetched,tup_inserted,tup_updated,tup_deleted FROM pg_stat_database where datname = '$DATABASE'"
+}
+
+OUTPUT1=`get_output`
+sleep $INTERVAL
+OUTPUT2=`get_output`
+
+#echo "$OUTPUT1"
+
+calc_value(){
+value1=`echo "$OUTPUT1" | cut -d"|" -f $1`
+value2=`echo "$OUTPUT2" | cut -d"|" -f $1`
+echo "scale=$scale; ($value2 - $value1)/$INTERVAL" | bc -l | sed 's/^-.*//g'
+}
+
+TUP_RETURNED=`calc_value 1`
+TUP_FETCHED=`calc_value 2`
+TUP_INSERTED=`calc_value 3`
+TUP_UPDATED=`calc_value 4`
+TUP_DELETED=`calc_value 5`
+
+TOTAL=`echo "scale=$scale; $TUP_RETURNED + $TUP_FETCHED + $TUP_UPDATED + $TUP_INSERTED + $TUP_DELETED" | bc -l`
+
+echo \
+TUP_RETURNED=$TUP_RETURNED // \
+TUP_FETCHED=$TUP_FETCHED // \
+TUP_UPDATED=$TUP_UPDATED // \
+TUP_INSERTED=$TUP_INSERTED // \
+TUP_DELETED=$TUP_DELETED // \
+TOTAL=$TOTAL \
+\| \
+TUP_RETURNED=$TUP_RETURNED \
+TUP_FETCHED=$TUP_FETCHED \
+TUP_UPDATED=$TUP_UPDATED \
+TUP_INSERTED=$TUP_INSERTED \
+TUP_DELETED=$TUP_DELETED \
+TOTAL=$TOTAL
