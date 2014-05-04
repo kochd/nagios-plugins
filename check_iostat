@@ -1,7 +1,7 @@
 #!/bin/sh
 basename=`basename $0`
 print_help(){
-    printf "$basename -d device [ -d DELAY ] \n \n"
+    printf "$basename -d device\n \n"
 
     printf " -d\t Device to check (e.g. /dev/sda) \n"
     printf "\n"
