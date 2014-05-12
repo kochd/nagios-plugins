@@ -1,0 +1,64 @@
+#!/bin/sh
+basename=`basename $0`
+print_help(){
+    printf "$basename -p PORT [ -w Warning_Threshold ] [ -c Critical_Threshold ] \n \n"
+
+    printf " -p\t Port \n"
+    printf " -w\t Warning threshold (Percent) \n"
+    printf " -c\t Critical threshold (Percent) \n"
+    printf "\n"
+exit 0
+}
+
+args=`getopt --long -o "w:c:p:h" "$@"`
+eval set -- "$args"
+while true; do
+    case "$1" in
+        -w)
+            WARN=$2
+            shift 2
+            ;;
+	-c)
+	    CRIT=$2
+	    shift 2
+	    ;;
+	-p)
+	    PORT=$2
+	    shift 2
+	    ;;
+	-h)
+	    print_help
+	    ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+
+OUTPUT=`ss | grep ^ESTAB | awk {'print $4'}  | grep ":$PORT"$ | wc -l`
+
+if [ -z "$OUTPUT" ]; then
+   echo "Failed to get an output"
+   exit 3
+fi
+
+if [ "$OUTPUT" -ge 2 ]; then
+    echo "$OUTPUT Connections on Port $PORT | connections=$OUTPUT"
+else
+    echo "$OUTPUT Connection on Port $PORT | connections=$OUTPUT"
+fi
+
+if [ -n "$CRIT" ]; then
+    if [ `echo "$OUTPUT > $CRIT" | bc -l` -eq 1 ] ; then
+	exit 2
+    fi
+fi
+
+if [ -n "$WARN" ]; then
+    if [  `echo "$OUTPUT > $WARN" | bc -l` -eq 1  ] ; then
+	exit 1
+    fi
+fi
+
+exit 0
