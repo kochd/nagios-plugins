@@ -50,13 +50,13 @@ else
 fi
 
 if [ -n "$CRIT" ]; then
-    if [ `echo "$OUTPUT > $CRIT" | bc -l` -eq 1 ] ; then
+    if [ "$OUTPUT" -ge "$CRIT"   ] ; then
 	exit 2
     fi
 fi
 
 if [ -n "$WARN" ]; then
-    if [  `echo "$OUTPUT > $WARN" | bc -l` -eq 1  ] ; then
+    if [ "$OUTPUT" -ge "$WARN"   ] ; then
 	exit 1
     fi
 fi
