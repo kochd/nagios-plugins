@@ -44,6 +44,8 @@ OUT=`echo $OUTPUT | awk '{print $2}'`
 IN_Bytes=`echo $IN*1024 | bc -l`
 OUT_Bytes=`echo $OUT*1024 | bc -l`
 
+UNIT="B"
+
 INT_IN=`echo $IN | sed 's/\..*//g'`
 INT_OUT=`echo $OUT | sed 's/\..*//g'`
 
@@ -52,6 +54,6 @@ if [ -z "$IN" ] || [ -z "$OUT" ]; then
     exit 3
 fi
 
-echo "Traffic for $INTERFACE -- Rx: $IN_Bytes B/s // Tx: $OUT_Bytes B/s | Tx=$OUT$UNIT;$WARNTX;$CRITTX Rx=$IN$UNIT;$WARNRX;$CRITRX"
+echo "Traffic for $INTERFACE -- Rx: $IN_Bytes B/s // Tx: $OUT_Bytes B/s | Tx=$OUT_Bytes$UNIT;$WARNTX;$CRITTX Rx=$IN_Bytes$UNIT;$WARNRX;$CRITRX"
 
 exit 0
