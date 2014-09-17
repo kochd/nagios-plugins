@@ -1,0 +1,28 @@
+#!/bin/bash
+print_help()
+{
+basename=`basename $0`
+echo $basename rx eth0   Show Traffic Rx for eth0
+echo $basename tx eth0   Show Traffic Tx for eth0
+}
+
+
+if [ -z $2 ]; then
+    device="eth0"
+else
+    device=$2
+fi
+
+case $1 in
+    rx)
+	value=$(vnstat -i $device | grep esti | head -n1 | awk '{print $2,$3}')
+	echo "$device: $value | $value"
+	;;
+    tx)
+	value=$(vnstat -i $device | grep esti | head -n1 | awk '{print $5,$6}')
+	echo "$device: $value | $value"
+	;;
+    *)
+	print_help
+	;;
+esac
