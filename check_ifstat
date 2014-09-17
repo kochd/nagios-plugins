@@ -41,16 +41,17 @@ OUTPUT=`ifstat -i $INTERFACE $DELAY 1 | tail -n1`
 IN=`echo $OUTPUT | awk '{print $1}'`
 OUT=`echo $OUTPUT | awk '{print $2}'`
 
+IN_Bytes=`echo $IN*1024 | bc -l`
+OUT_Bytes=`echo $OUT*1024 | bc -l`
+
 INT_IN=`echo $IN | sed 's/\..*//g'`
 INT_OUT=`echo $OUT | sed 's/\..*//g'`
-
-UNIT=KB
 
 if [ -z "$IN" ] || [ -z "$OUT" ]; then
     echo "Failed to get a value for $INTERFACE"
     exit 3
 fi
 
-echo "Traffic for $INTERFACE -- Rx: $IN KB/s // Tx: $OUT KB/s | Tx=$OUT$UNIT;$WARNTX;$CRITTX Rx=$IN$UNIT;$WARNRX;$CRITRX"
+echo "Traffic for $INTERFACE -- Rx: $IN_Bytes B/s // Tx: $OUT_Bytes B/s | Tx=$OUT$UNIT;$WARNTX;$CRITTX Rx=$IN$UNIT;$WARNRX;$CRITRX"
 
 exit 0
