@@ -1,71 +1,35 @@
-#!/bin/sh
-basename=`basename $0`
-print_help(){
-    printf "$basename -i INTERVAL"
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+require 'optparse'
+require 'pp'
 
-    printf " -i\t Interval for messurement "
-    printf "\n"
-exit 0
-}
-DELAY=60
-args=`getopt --long -o "i:h" "$@"`
-eval set -- "$args"
-while true; do
-    case "$1" in
-        -i)
-            INTERVAL=$2
-            shift 2
-            ;;
-	-h)
-	    print_help
-	    ;;
-        *)
-            break
-            ;;
-    esac
-done
+options = {}
 
-OUTPUT=`mpstat 1 $INTERVAL | tail -n1`
+OptionParser.new do |opts|
+  opts.banner = "Usage: check_mpstat [options]"
+  opts.on("-iINTERVAL", "--interval=INTERVAL", "Time in seconds to sample") {|n| options[:interval] = n.to_i}
+end.parse!
 
-usr=`echo $OUTPUT | awk '{print $3}'`
-nice=`echo $OUTPUT | awk '{print $4}'`
-sys=`echo $OUTPUT | awk '{print $5}'`
-iowait=`echo $OUTPUT | awk '{print $6}'`
-irq=`echo $OUTPUT | awk '{print $7}'`
-soft=`echo $OUTPUT | awk '{print $8}'`
-steal=`echo $OUTPUT | awk '{print $9}'`
-guest=`echo $OUTPUT | awk '{print $10}'`
-idle=`echo $OUTPUT | awk '{print $11}'`
-idledotsep=`echo $idle | tr "," "."`
-total=`echo "scale=2; 100-$idledotsep" | bc -l`
+options[:interval] ||= 2
+raise OptionParser::InvalidOption, "Interval cant be 0" if options[:interval] == 0
 
+input = `mpstat 1 #{options[:interval]}`
+fields = input.split("\n")[2].split(/ +/)
+fields.map!{|f| f.sub(/^%/,"")}
+values = input.split("\n").last.split(/ +/)
 
+data = Hash.new(0)
+fields.each_with_index do |field, i|
+  data[field] = values[i].gsub(",",".").to_f
+end
 
-if [ -z "$OUTPUT" ]; then
-    echo "Failed to get a value for $DEVICE"
-    exit 3
-fi
+data['total'] = 100.0 - data['idle']
 
-echo "usr: $usr% // \
-nice: $nice% // \
-sys: $sys% // \
-iowait: $iowait% // \
-irq: $irq% // \
-soft: $soft% // \
-steal: $steal% // \
-guest: $guest% // \
-total: $total% \
-|\
-usr=${usr}% \
-nice=${nice}% \
-sys=${sys}% \
-iowait=${iowait}% \
-irq=${irq}% \
-soft=${soft}% \
-steal=${steal}% \
-guest=${guest}% \
-total=${total}%
-"
+output = ""
+perfdata = ""
+%w"usr nice sys iowait irq soft steal guest total".each do |key|
+  output << "#{key}: #{data[key].round(2)}% // "
+  perfdata << "#{key}=#{data[key].round(2)}% "
+end
 
-
-exit 0
+print "#{output} | #{perfdata}"
